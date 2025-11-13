@@ -1,0 +1,18 @@
+services:
+  inference-node1:
+    image: nginx:1.28.0-alpine
+    hostname: inference-node1
+    ports:
+      - "8080:8080"
+      - "5000:5000"
+    environment:
+      - RUNPOD_ID=e6rbg7z3qyr7a4
+    volumes:
+      - ./nginx-runpod.conf.template:/etc/nginx/nginx.conf.template:ro
+    command: >
+      /bin/sh -c "
+        apk add --no-cache gettext &&
+        envsubst '$$RUNPOD_ID' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf &&
+        nginx -g 'daemon off;'
+      "
+    restart: always

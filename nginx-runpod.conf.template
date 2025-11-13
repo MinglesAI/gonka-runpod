@@ -1,0 +1,91 @@
+events {}
+
+http {
+
+    resolver 8.8.8.8 8.8.4.4 valid=300s ipv6=off;
+    resolver_timeout 5s;
+
+    server {
+        listen 8080;
+
+        # --- SETTINGS FOR UNLIMITED SIZE & TIMEOUT ---
+        client_max_body_size      0;      # No limit on request body size
+        proxy_connect_timeout     24h;    # Long timeout for connection
+        proxy_send_timeout        24h;    # Long timeout for sending data
+        proxy_read_timeout        24h;    # Long timeout for receiving data
+
+        # SSL verification settings
+        proxy_ssl_verify off;
+        proxy_ssl_server_name on;
+        proxy_ssl_name ${RUNPOD_ID}-8080.proxy.runpod.net;
+
+        # Variables for dynamic DNS resolution (forces IPv4)
+        set $upstream_8080 ${RUNPOD_ID}-8080.proxy.runpod.net;
+
+        # Route for the new version
+        location /v3.0.8/ {
+            rewrite ^/v3.0.8/(.*)$ /$1 break;
+            proxy_pass https://$upstream_8080;
+            proxy_set_header Host ${RUNPOD_ID}-8080.proxy.runpod.net;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto https;
+            proxy_http_version 1.1;
+            proxy_set_header Connection "";
+        }
+
+        # Default route for backward compatibility
+        location / {
+            proxy_pass https://$upstream_8080;
+            proxy_set_header Host ${RUNPOD_ID}-8080.proxy.runpod.net;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto https;
+            proxy_http_version 1.1;
+            proxy_set_header Connection "";
+        }
+    }
+
+    server {
+        # Temporary server block for backward compatibility when 2 ports are used
+        listen 5000;
+
+        # --- SETTINGS FOR UNLIMITED SIZE & TIMEOUT ---
+        client_max_body_size      0;      # No limit on request body size
+        proxy_connect_timeout     24h;    # Long timeout for connection
+        proxy_send_timeout        24h;    # Long timeout for sending data
+        proxy_read_timeout        24h;    # Long timeout for receiving data
+
+        # SSL verification settings
+        proxy_ssl_verify off;
+        proxy_ssl_server_name on;
+        proxy_ssl_name ${RUNPOD_ID}-5000.proxy.runpod.net;
+
+        # Variables for dynamic DNS resolution (forces IPv4)
+        set $upstream_5000 ${RUNPOD_ID}-5000.proxy.runpod.net;
+
+        # Route for the new version
+        location /v3.0.8/ {
+            rewrite ^/v3.0.8/(.*)$ /$1 break;
+            proxy_pass https://$upstream_5000;
+            proxy_set_header Host ${RUNPOD_ID}-5000.proxy.runpod.net;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto https;
+            proxy_http_version 1.1;
+            proxy_set_header Connection "";
+        }
+
+        # Default route for backward compatibility
+        location / {
+            proxy_pass https://$upstream_5000;
+            proxy_set_header Host ${RUNPOD_ID}-5000.proxy.runpod.net;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto https;
+            proxy_http_version 1.1;
+            proxy_set_header Connection "";
+        }
+    }
+}
+
