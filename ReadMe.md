@@ -3,9 +3,7 @@
 ## Quick Start
 
 ### 1. Use the ready-made RunPod template:
-```
-https://console.runpod.io/deploy?template=vuf848tt4c&ref=1pxn4obn
-```
+[RunPod Deployment Template](https://console.runpod.io/deploy?template=vuf848tt4c&ref=1pxn4obn)
 
 ### 2. Register the node with Network Node:
 
